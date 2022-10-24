@@ -10,6 +10,37 @@
 FrameBuffer fb;
 FrameBuffer picture;
 
+u16 colors[] = {
+    WHITE, BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW};
+
+const u8 colorCount = sizeof(colors) / sizeof(colors[0]);
+
+void drawHudColor(u8 i, bool selected)
+{
+    u16 color = colors[i];
+
+    gfxFillRect(fb, 10 + 15 * i, 2, 12, 12, color);
+    if (selected)
+        gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, GREEN);
+    else
+        gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, BLACK);
+}
+
+void hudColorSelect(touchPosition pos, u8 *selectedColor)
+{
+    u16 x = pos.px;
+    u16 y = pos.py;
+
+    for (int i = 0; i < colorCount; ++i)
+    {
+        if (x >= 10 + 15 * i && y >= 2 && x <= 10 + 15 * i + 12 && y <= 14)
+        {
+            *selectedColor = i;
+            break;
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     if (!fatInitDefault())
@@ -58,6 +89,7 @@ int main(int argc, char **argv)
     int oldTouchY = -1;
     u16 bgScrollX = 0;
     bool showHud = true;
+    u8 selectedColor = 1;
     while (true)
     {
         scanKeys();
@@ -66,6 +98,16 @@ int main(int argc, char **argv)
         // toggle showing HUD when pressing L or R
         if (kdown & KEY_L || kdown & KEY_R)
             showHud = !showHud;
+        else if (kdown & KEY_TOUCH)
+        {
+            touchPosition pos;
+            touchRead(&pos);
+
+            if (pos.py < 16)
+            {
+                hudColorSelect(pos, &selectedColor);
+            }
+        }
 
         // scroll background on top screen
         bgSetScroll(bgTop, bgScrollX++, 0);
@@ -78,11 +120,13 @@ int main(int argc, char **argv)
         {
             touchPosition pos;
             touchRead(&pos);
-
-            if (oldTouchX == -1 || oldTouchY == -1)
-                gfxPutPixel(picture, pos.px, pos.py, BLACK);
-            else
-                gfxDrawLine(picture, oldTouchX, oldTouchY, pos.px, pos.py, BLACK);
+            if (!((pos.py < 16 || pos.py > 192 - 16) && showHud))
+            {
+                if (oldTouchX == -1 || oldTouchY == -1)
+                    gfxPutPixel(picture, pos.px, pos.py, colors[selectedColor]);
+                else
+                    gfxDrawLine(picture, oldTouchX, oldTouchY, pos.px, pos.py, colors[selectedColor]);
+            }
 
             oldTouchX = pos.px;
             oldTouchY = pos.py;
@@ -103,6 +147,11 @@ int main(int argc, char **argv)
 
             gfxFillRect(fb, 0, 0, 256, 16, ARGB16(1, 20, 29, 31));
             gfxDrawLine(fb, 0, 16, 256, 16, ARGB16(1, 0, 0, 0));
+
+            // draw colors
+
+            for (u8 i = 0; i < colorCount; ++i)
+                drawHudColor(i, selectedColor == i);
         }
 
         // copy frame buffer into bottom screen
