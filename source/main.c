@@ -15,7 +15,7 @@ u16 colors[] = {
 
 const u8 colorCount = sizeof(colors) / sizeof(colors[0]);
 
-void drawHudColor(u8 i, bool selected)
+void hudDrawColors(u8 i, bool selected)
 {
     u16 color = colors[i];
 
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
             // draw colors
 
             for (u8 i = 0; i < colorCount; ++i)
-                drawHudColor(i, selectedColor == i);
+                hudDrawColors(i, selectedColor == i);
         }
 
         // copy frame buffer into bottom screen
