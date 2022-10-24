@@ -30,10 +30,12 @@ void hudColorSelect(touchPosition pos, u8 *selectedColor)
 {
     u16 x = pos.px;
     u16 y = pos.py;
+    if (!(y <= 14 || y >= 2))
+        return;
 
     for (int i = 0; i < colorCount; ++i)
     {
-        if (x >= 10 + 15 * i && y >= 2 && x <= 10 + 15 * i + 12 && y <= 14)
+        if (x >= 10 + 15 * i && x <= 10 + 15 * i + 12)
         {
             *selectedColor = i;
             break;
