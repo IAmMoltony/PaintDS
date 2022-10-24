@@ -15,6 +15,14 @@ void gfxFillRect(FrameBuffer fb, int x, int y, int w, int h, u16 color)
             gfxPutPixel(fb, x + i, y + j, color);
 }
 
+void gfxStrokeRect(FrameBuffer fb, int x, int y, int w, int h, u16 color)
+{
+    for (int i = 0; i < w; ++i)
+        for (int j = 0; j < h; ++j)
+            if (i == 0 || j == 0 || i == w - 1 || j == h - 1)
+                gfxPutPixel(fb, x + i, y + j, color);
+}
+
 void gfxDrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color)
 {
     // https://ghost-together.medium.com/how-to-code-your-first-algorithm-draw-a-line-ca121f9a1395
