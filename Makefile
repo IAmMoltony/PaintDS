@@ -6,8 +6,6 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-include $(DEVKITARM)/ds_rules
-
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
@@ -15,6 +13,7 @@ include $(DEVKITARM)/ds_rules
 # INCLUDES is a list of directories containing extra header files
 # DATA is a list of directories containing binary data
 # GRAPHICS is a list of directories containing files to be processed by grit
+# NITRODATA is where the nitro files (stored in rom) are at
 #
 # All directories are specified relative to the project directory where
 # the makefile is found
@@ -23,21 +22,32 @@ include $(DEVKITARM)/ds_rules
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
-DATA		:=	data  
+DATA		:=	data
 INCLUDES	:=	include
 GRAPHICS	:=	gfx
+NITRODATA   :=  nitrofs
+
+#GAME_ICON      := ../icon.bmp
+GAME_TITLE     := Paint DS
+GAME_SUBTITLE1 := Nintendo DS painting app
+GAME_SUBTITLE2 := github.com/IAmMoltony
+
+include $(DEVKITARM)/ds_rules
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH		:=	-mthumb -mthumb-interwork
+ARCH		:=	-mthumb -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Wextra -Wno-free-nonheap-object -Wno-unknown-pragmas -Wno-psabi -O2 -Os\
  			-march=armv5te -mtune=arm946e-s \
-			$(ARCH)
+			$(ARCH) -I../include -Wno-switch -Wno-ignored-qualifiers \
+			-Wno-unused-parameter\
+			-fomit-frame-pointer\
+			-ffast-math
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -I../include
-CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
+CFLAGS	+=	$(INCLUDE) -DARM9
+CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions -Wno-reorder
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
@@ -45,7 +55,7 @@ LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lfat -lnds9 -lm
+LIBS	:= -lmm9 -lfat -lnds9 -lfilesystem -lnds9d
  
  
 #---------------------------------------------------------------------------------
@@ -60,9 +70,9 @@ LIBDIRS	:=	$(LIBNDS)
 #---------------------------------------------------------------------------------
 
 
-ifneq ($(BUILDDIR), $(CURDIR))
+ifneq ($(BUILDDIR),$(CURDIR))
 #---------------------------------------------------------------------------------
- 
+export TOPDIR   :=  $(CURDIR)
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
  
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -70,6 +80,10 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 					$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+
+ifneq ($(strip $(NITRODATA)),)
+	export NITRO_FILES  :=  $(CURDIR)/$(NITRODATA)
+endif
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
@@ -102,7 +116,7 @@ export HFILES := $(PNGFILES:.png=.h) $(BMPFILES:.bmp=.h) $(addsuffix .h,$(subst 
  
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					-I$(CURDIR)/$(BUILD)
+					-I$(CURDIR)/$(BUILD) -Iinclude
  
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
@@ -111,7 +125,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@make BUILDDIR=`cd $(BUILD) && pwd` --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@$(MAKE) BUILDDIR=`cd $(BUILD) && pwd` --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 clean:
@@ -119,7 +133,7 @@ clean:
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds
 
 #---------------------------------------------------------------------------------
-EMULATOR := e:/melonds/melonds
+EMULATOR := E:/melonds/melonds
 run:
 	@echo run ...
 	@$(EMULATOR) $(TARGET).nds
@@ -134,6 +148,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 # main targets
 #---------------------------------------------------------------------------------
 $(OUTPUT).nds	: 	$(OUTPUT).elf
+$(OUTPUT).nds   :   $(shell find ../$(NITRODATA))
 $(OUTPUT).elf	:	$(OFILES)
 
 
