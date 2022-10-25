@@ -16,7 +16,7 @@ u16 colors[] = {
 
 const u8 colorCount = sizeof(colors) / sizeof(colors[0]);
 
-void hudDrawColors(u8 selected)
+void hudDrawPencilColors(u8 selected)
 {
     for (u8 i = 0; i < colorCount; ++i)
     {
@@ -30,19 +30,36 @@ void hudDrawColors(u8 selected)
     }
 }
 
-void hudColorSelect(touchPosition pos, u8 *selectedColor)
+void hudPencilColorSelect(touchPosition pos, u8 *selectedColor)
 {
     u16 x = pos.px;
     u16 y = pos.py;
     if (!(y <= 14 || y >= 2))
         return;
 
-    for (int i = 0; i < colorCount; ++i)
+    for (u8 i = 0; i < colorCount; ++i)
     {
         if (x >= 10 + 15 * i && x <= 10 + 15 * i + 12)
         {
             *selectedColor = i;
-            break;
+            return;
+        }
+    }
+}
+
+void hudPencilThicknessSelect(touchPosition pos, u8 *pencilThickness)
+{
+    u16 x = pos.px;
+    u16 y = pos.py;
+    if (!(y <= 14 || y >= 2))
+        return;
+
+    for (u8 i = 0; i < 3; ++i)
+    {
+        if (x >= 256 - 44 + 15 * i && x <= 256 - 44 + 15 * i + 12)
+        {
+            *pencilThickness = i;
+            return;
         }
     }
 }
@@ -109,7 +126,7 @@ int main(int argc, char **argv)
     u16 bgScrollX = 0;
     bool showHud = true;
     u8 selectedColor = 0;
-    u8 lineThickness = 1;
+    u8 pencilThickness = 0;
     while (true)
     {
         scanKeys();
@@ -125,7 +142,8 @@ int main(int argc, char **argv)
 
             if (pos.py < 16)
             {
-                hudColorSelect(pos, &selectedColor);
+                hudPencilColorSelect(pos, &selectedColor);
+                hudPencilThicknessSelect(pos, &pencilThickness);
             }
         }
 
@@ -142,10 +160,24 @@ int main(int argc, char **argv)
             touchRead(&pos);
             if (!((pos.py < 16 || pos.py > 192 - 16) && showHud))
             {
-                if (oldTouchX == -1 || oldTouchY == -1)
-                    gfxPutPixel(picture, pos.px, pos.py, colors[selectedColor]);
-                else
-                    gfxDrawLineThickness(picture, oldTouchX, oldTouchY, pos.px, pos.py, colors[selectedColor], lineThickness);
+                int x1 = (oldTouchX == -1) ? pos.px : oldTouchX;
+                int y1 = (oldTouchY == -1) ? pos.py : oldTouchY;
+
+                u8 thickness;
+                switch (pencilThickness)
+                {
+                default:
+                    thickness = 1;
+                    pencilThickness = 0;
+                    break;
+                case 1:
+                    thickness = 4;
+                    break;
+                case 2:
+                    thickness = 8;
+                    break;
+                }
+                gfxDrawLineThickness(picture, x1, y1, pos.px, pos.py, colors[selectedColor], thickness);
             }
 
             oldTouchX = pos.px;
@@ -168,10 +200,20 @@ int main(int argc, char **argv)
             gfxFillRect(fb, 0, 0, 256, 16, ARGB16(1, 20, 29, 31));
             gfxDrawLine(fb, 0, 16, 256, 16, ARGB16(1, 0, 0, 0));
 
-            // draw colors
-            hudDrawColors(selectedColor);
+            // draw pencil colors
+            hudDrawPencilColors(selectedColor);
 
-            // draw tools
+            // draw pencil thicknesses
+            gfxStrokeRect(fb, 256 - 44, 2, 12, 12, pencilThickness == 0 ? GREEN : BLACK);
+            gfxPutPixel(fb, 256 - 39, 7, colors[selectedColor]);
+
+            gfxStrokeRect(fb, 256 - 29, 2, 12, 12, pencilThickness == 1 ? GREEN : BLACK);
+            gfxFillRect(fb, 256 - 25, 5, 4, 4, colors[selectedColor]);
+
+            gfxStrokeRect(fb, 256 - 14, 2, 12, 12, pencilThickness == 2 ? GREEN : BLACK);
+            gfxFillRect(fb, 256 - 12, 4, 8, 8, colors[selectedColor]);
+
+            // draw tool images
             ppmDraw(fb, imgPencil, 2, 192 - 14);
             ppmDraw(fb, imgEraser, 16, 192 - 14);
         }
