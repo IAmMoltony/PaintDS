@@ -108,7 +108,8 @@ int main(int argc, char **argv)
     int oldTouchY = -1;
     u16 bgScrollX = 0;
     bool showHud = true;
-    u8 selectedColor = 1;
+    u8 selectedColor = 0;
+    u8 lineThickness = 1;
     while (true)
     {
         scanKeys();
@@ -144,7 +145,7 @@ int main(int argc, char **argv)
                 if (oldTouchX == -1 || oldTouchY == -1)
                     gfxPutPixel(picture, pos.px, pos.py, colors[selectedColor]);
                 else
-                    gfxDrawLine(picture, oldTouchX, oldTouchY, pos.px, pos.py, colors[selectedColor]);
+                    gfxDrawLineThickness(picture, oldTouchX, oldTouchY, pos.px, pos.py, colors[selectedColor], lineThickness);
             }
 
             oldTouchX = pos.px;
