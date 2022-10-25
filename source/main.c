@@ -1,10 +1,11 @@
 #include <nds.h>
 #include <fat.h>
+#include <filesystem.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include "colors.h"
-#include "graphics.h"
+#include "ppm.h"
 #include "background.h"
 
 FrameBuffer fb;
@@ -45,6 +46,15 @@ void hudColorSelect(touchPosition pos, u8 *selectedColor)
 
 int main(int argc, char **argv)
 {
+    if (!nitroFSInit(NULL))
+    {
+        consoleDemoInit();
+        printf("nitrofs init failed");
+
+        while (true)
+            ;
+    }
+
     if (!fatInitDefault())
     {
         consoleDemoInit();
