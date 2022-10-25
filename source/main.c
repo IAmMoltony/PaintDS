@@ -177,9 +177,7 @@ int main(int argc, char **argv)
                     if (pos.py >= 2 && pos.px >= 2 && pos.py <= 14 && pos.px <= 14)
                         // TODO move clearing framebuffer into its own function
                         for (int i = 0; i < 256 * 192; ++i)
-                        {
                             picture[i] = WHITE;
-                        }
                     break;
                 }
 
@@ -192,9 +190,7 @@ int main(int argc, char **argv)
                 }
             }
             else if (pos.py > 192 - 16 && showHud)
-            {
                 hudChooseTool(pos, &tool);
-            }
         }
 
         // scroll background on top screen
