@@ -274,8 +274,8 @@ int main(int argc, char **argv)
             }
 
             // draw tool images
-            ppmDraw(fb, imgPencil, 2, 192 - 14);
-            ppmDraw(fb, imgEraser, 16, 192 - 14);
+            ppmDraw(fb, imgPencil, 2, 192 - 14 - ((tool == toolPencil) ? 3 : 0));
+            ppmDraw(fb, imgEraser, 16, 192 - 14 - ((tool == toolEraser) ? 3 : 0));
         }
 
         // copy frame buffer into bottom screen
