@@ -61,9 +61,9 @@ int main(int argc, char **argv)
     if (!fatInitDefault())
     {
         consoleDemoInit();
-        printf("oh no!\n\n");
-        printf("failed to initialize FAT.\n");
-        printf("make sure your rom is properly patched\n");
+        printf("Oh no!\n\n");
+        printf("Failed to initialize FAT.\n");
+        printf("Make sure your rom is properly patched\n");
         printf("and the SD card is inserted.");
 
         while (true)
