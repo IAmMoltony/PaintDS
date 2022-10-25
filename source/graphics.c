@@ -25,6 +25,18 @@ void gfxStrokeRect(FrameBuffer fb, int x, int y, int w, int h, u16 color)
 
 void gfxDrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color)
 {
+    gfxDrawLineThickness(fb, x1, y1, x2, y2, color, 1);
+}
+
+static void drawThickPixel(FrameBuffer fb, int x, int y, u16 color, u8 thickness)
+{
+    int ax = x - thickness / 2;
+    int ay = y - thickness / 2;
+    gfxFillRect(fb, ax, ay, thickness, thickness, color);
+}
+
+void gfxDrawLineThickness(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color, u8 thickness)
+{
     // https://ghost-together.medium.com/how-to-code-your-first-algorithm-draw-a-line-ca121f9a1395
     // i spent many hours trying to find this algorithm
 
@@ -58,7 +70,7 @@ void gfxDrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color)
             xe = x1;
         }
 
-        gfxPutPixel(fb, x, y, color); // first pixel
+        drawThickPixel(fb, x, y, color, thickness); // first pixel
 
         // rasterize line
         for (i = 0; x < xe; ++i)
@@ -79,7 +91,7 @@ void gfxDrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color)
                 px = px + 2 * (dy1 - dx1);
             }
 
-            gfxPutPixel(fb, x, y, color);
+            drawThickPixel(fb, x, y, color, thickness);
         }
     }
     // y axis dominant
@@ -98,7 +110,7 @@ void gfxDrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color)
             ye = y1;
         }
 
-        gfxPutPixel(fb, x, y, color); // first pixel
+        drawThickPixel(fb, x, y, color, thickness); // first pixel
 
         // rasterize line
         for (i = 0; y < ye; ++i)
@@ -117,7 +129,7 @@ void gfxDrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color)
                 py = py + 2 * (dx1 - dy1);
             }
 
-            gfxPutPixel(fb, x, y, color);
+            drawThickPixel(fb, x, y, color, thickness);
         }
     }
 }
