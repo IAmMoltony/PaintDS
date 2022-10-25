@@ -12,8 +12,6 @@ PPMImage *ppmLoad(const char *filename)
     fp = fopen(filename, "rb");
     if (!fp)
     {
-        consoleDemoInit();
-        printf("wef");
         while (true)
             ;
     }
