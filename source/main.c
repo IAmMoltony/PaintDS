@@ -12,19 +12,22 @@ FrameBuffer fb;
 FrameBuffer picture;
 
 u16 colors[] = {
-    WHITE, BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW};
+    BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW};
 
 const u8 colorCount = sizeof(colors) / sizeof(colors[0]);
 
-void hudDrawColors(u8 i, bool selected)
+void hudDrawColors(u8 selected)
 {
-    u16 color = colors[i];
+    for (u8 i = 0; i < colorCount; ++i)
+    {
+        u16 color = colors[i];
 
-    gfxFillRect(fb, 10 + 15 * i, 2, 12, 12, color);
-    if (selected)
-        gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, GREEN);
-    else
-        gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, BLACK);
+        gfxFillRect(fb, 10 + 15 * i, 2, 12, 12, color);
+        if (selected == i)
+            gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, GREEN);
+        else
+            gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, BLACK);
+    }
 }
 
 void hudColorSelect(touchPosition pos, u8 *selectedColor)
@@ -97,6 +100,10 @@ int main(int argc, char **argv)
         picture[i] = WHITE;
     }
 
+    // load some assets
+    PPMImage *imgPencil = ppmLoad("nitro:/graphics/pencil.ppm");
+    PPMImage *imgEraser = ppmLoad("nitro:/graphics/eraser.ppm");
+
     int oldTouchX = -1;
     int oldTouchY = -1;
     u16 bgScrollX = 0;
@@ -161,9 +168,11 @@ int main(int argc, char **argv)
             gfxDrawLine(fb, 0, 16, 256, 16, ARGB16(1, 0, 0, 0));
 
             // draw colors
+            hudDrawColors(selectedColor);
 
-            for (u8 i = 0; i < colorCount; ++i)
-                hudDrawColors(i, selectedColor == i);
+            // draw tools
+            ppmDraw(fb, imgPencil, 2, 192 - 14);
+            ppmDraw(fb, imgEraser, 16, 192 - 14);
         }
 
         // copy frame buffer into bottom screen
