@@ -143,6 +143,7 @@ int main(int argc, char **argv)
     // load some assets
     PPMImage *imgPencil = ppmLoad("nitro:/graphics/pencil.ppm");
     PPMImage *imgEraser = ppmLoad("nitro:/graphics/eraser.ppm");
+    PPMImage *imgEraseAll = ppmLoad("nitro:/graphics/eraseall.ppm");
 
     int oldTouchX = -1;
     int oldTouchY = -1;
@@ -170,6 +171,15 @@ int main(int argc, char **argv)
                 {
                 case toolPencil:
                     hudPencilColorSelect(pos, &selectedColor);
+                    break;
+                case toolEraser:
+                    // erase all button
+                    if (pos.py >= 2 && pos.px >= 2 && pos.py <= 14 && pos.px <= 14)
+                        // TODO move clearing framebuffer into its own function
+                        for (int i = 0; i < 256 * 192; ++i)
+                        {
+                            picture[i] = WHITE;
+                        }
                     break;
                 }
 
@@ -254,6 +264,10 @@ int main(int argc, char **argv)
             case toolPencil:
                 // draw pencil colors
                 hudDrawPencilColors(selectedColor);
+                break;
+            case toolEraser:
+                // draw erase all button
+                ppmDraw(fb, imgEraseAll, 2, 2);
                 break;
             }
 
