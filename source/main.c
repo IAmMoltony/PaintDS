@@ -8,6 +8,12 @@
 #include "ppm.h"
 #include "background.h"
 
+typedef enum
+{
+    toolPencil = 0,
+    toolEraser = 1,
+} Tool;
+
 FrameBuffer fb;
 FrameBuffer picture;
 
@@ -47,7 +53,7 @@ void hudPencilColorSelect(touchPosition pos, u8 *selectedColor)
     }
 }
 
-void hudPencilThicknessSelect(touchPosition pos, u8 *pencilThickness)
+void hudLineThicknessSelect(touchPosition pos, u8 *lineThickness)
 {
     u16 x = pos.px;
     u16 y = pos.py;
@@ -58,7 +64,24 @@ void hudPencilThicknessSelect(touchPosition pos, u8 *pencilThickness)
     {
         if (x >= 256 - 44 + 15 * i && x <= 256 - 44 + 15 * i + 12)
         {
-            *pencilThickness = i;
+            *lineThickness = i;
+            return;
+        }
+    }
+}
+
+void hudChooseTool(touchPosition pos, Tool *tool)
+{
+    u16 x = pos.px;
+    u16 y = pos.py;
+    if (!(y >= 192 - 16 || y <= 192))
+        return;
+
+    for (Tool i = toolPencil; i <= toolEraser; ++i)
+    {
+        if (x >= 2 + 15 * i && x <= 2 + 15 * i + 12)
+        {
+            *tool = i;
             return;
         }
     }
@@ -126,7 +149,8 @@ int main(int argc, char **argv)
     u16 bgScrollX = 0;
     bool showHud = true;
     u8 selectedColor = 0;
-    u8 pencilThickness = 0;
+    u8 lineThickness = 0;
+    Tool tool = toolPencil;
     while (true)
     {
         scanKeys();
@@ -140,10 +164,26 @@ int main(int argc, char **argv)
             touchPosition pos;
             touchRead(&pos);
 
-            if (pos.py < 16)
+            if (pos.py < 16 && showHud)
             {
-                hudPencilColorSelect(pos, &selectedColor);
-                hudPencilThicknessSelect(pos, &pencilThickness);
+                switch (tool)
+                {
+                case toolPencil:
+                    hudPencilColorSelect(pos, &selectedColor);
+                    break;
+                }
+
+                switch (tool)
+                {
+                case toolPencil:
+                case toolEraser:
+                    hudLineThicknessSelect(pos, &lineThickness);
+                    break;
+                }
+            }
+            else if (pos.py > 192 - 16 && showHud)
+            {
+                hudChooseTool(pos, &tool);
             }
         }
 
@@ -164,11 +204,11 @@ int main(int argc, char **argv)
                 int y1 = (oldTouchY == -1) ? pos.py : oldTouchY;
 
                 u8 thickness;
-                switch (pencilThickness)
+                switch (lineThickness)
                 {
                 default:
                     thickness = 1;
-                    pencilThickness = 0;
+                    lineThickness = 0;
                     break;
                 case 1:
                     thickness = 4;
@@ -177,7 +217,16 @@ int main(int argc, char **argv)
                     thickness = 8;
                     break;
                 }
-                gfxDrawLineThickness(picture, x1, y1, pos.px, pos.py, colors[selectedColor], thickness);
+
+                switch (tool)
+                {
+                case toolPencil:
+                    gfxDrawLineThickness(picture, x1, y1, pos.px, pos.py, colors[selectedColor], thickness);
+                    break;
+                case toolEraser:
+                    gfxDrawLineThickness(picture, x1, y1, pos.px, pos.py, WHITE, thickness);
+                    break;
+                }
             }
 
             oldTouchX = pos.px;
@@ -200,18 +249,29 @@ int main(int argc, char **argv)
             gfxFillRect(fb, 0, 0, 256, 16, ARGB16(1, 20, 29, 31));
             gfxDrawLine(fb, 0, 16, 256, 16, ARGB16(1, 0, 0, 0));
 
-            // draw pencil colors
-            hudDrawPencilColors(selectedColor);
+            switch (tool)
+            {
+            case toolPencil:
+                // draw pencil colors
+                hudDrawPencilColors(selectedColor);
+                break;
+            }
 
-            // draw pencil thicknesses
-            gfxStrokeRect(fb, 256 - 44, 2, 12, 12, pencilThickness == 0 ? GREEN : BLACK);
-            gfxPutPixel(fb, 256 - 39, 7, colors[selectedColor]);
+            switch (tool)
+            {
+            case toolPencil:
+            case toolEraser:
+                // draw line thicknesses
+                gfxStrokeRect(fb, 256 - 44, 2, 12, 12, lineThickness == 0 ? GREEN : BLACK);
+                gfxPutPixel(fb, 256 - 39, 7, colors[selectedColor]);
 
-            gfxStrokeRect(fb, 256 - 29, 2, 12, 12, pencilThickness == 1 ? GREEN : BLACK);
-            gfxFillRect(fb, 256 - 25, 5, 4, 4, colors[selectedColor]);
+                gfxStrokeRect(fb, 256 - 29, 2, 12, 12, lineThickness == 1 ? GREEN : BLACK);
+                gfxFillRect(fb, 256 - 25, 5, 4, 4, colors[selectedColor]);
 
-            gfxStrokeRect(fb, 256 - 14, 2, 12, 12, pencilThickness == 2 ? GREEN : BLACK);
-            gfxFillRect(fb, 256 - 12, 4, 8, 8, colors[selectedColor]);
+                gfxStrokeRect(fb, 256 - 14, 2, 12, 12, lineThickness == 2 ? GREEN : BLACK);
+                gfxFillRect(fb, 256 - 12, 4, 8, 8, colors[selectedColor]);
+                break;
+            }
 
             // draw tool images
             ppmDraw(fb, imgPencil, 2, 192 - 14);
