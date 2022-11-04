@@ -27,7 +27,7 @@ INCLUDES	:=	include
 GRAPHICS	:=	gfx
 NITRODATA   :=  nitrofs
 
-#GAME_ICON      := ../icon.bmp
+GAME_ICON      := ../icon.bmp
 GAME_TITLE     := Paint DS
 GAME_SUBTITLE1 := Nintendo DS painting app
 GAME_SUBTITLE2 := github.com/IAmMoltony
