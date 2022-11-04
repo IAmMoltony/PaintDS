@@ -17,4 +17,5 @@ typedef struct
 #define RGB_COMPONENT_COLOR 255
 
 PPMImage *ppmLoad(const char *filename);
+void ppmUnload(PPMImage *img);
 void ppmDraw(FrameBuffer fb, PPMImage *img, int x, int y);

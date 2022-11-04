@@ -93,6 +93,12 @@ PPMImage *ppmLoad(const char *filename)
     return img;
 }
 
+void ppmUnload(PPMImage *img)
+{
+    free(img->pixels);
+    free(img);
+}
+
 void ppmDraw(FrameBuffer fb, PPMImage *img, int x, int y)
 {
     for (int i = 0; i < img->w; ++i)
