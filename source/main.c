@@ -23,7 +23,7 @@ u16 colors[] = {
 
 const u8 colorCount = sizeof(colors) / sizeof(colors[0]);
 
-void hudDrawPencilColors(u8 selected)
+void hudDrawColors(u8 selected)
 {
     for (u8 i = 0; i < colorCount; ++i)
     {
@@ -37,7 +37,7 @@ void hudDrawPencilColors(u8 selected)
     }
 }
 
-void hudPencilColorSelect(touchPosition pos, u8 *selectedColor)
+void hudColorSelect(touchPosition pos, u8 *selectedColor)
 {
     u16 x = pos.px;
     u16 y = pos.py;
@@ -78,7 +78,7 @@ void hudChooseTool(touchPosition pos, Tool *tool)
     if (!(y >= 192 - 16 || y <= 192))
         return;
 
-    for (Tool i = toolPencil; i <= toolEraser; ++i)
+    for (Tool i = toolPencil; i <= toolFill; ++i)
     {
         if (x >= 2 + 15 * i && x <= 2 + 15 * i + 12)
         {
@@ -172,7 +172,8 @@ int main(int argc, char **argv)
                 switch (tool)
                 {
                 case toolPencil:
-                    hudPencilColorSelect(pos, &selectedColor);
+                case toolFill:
+                    hudColorSelect(pos, &selectedColor);
                     break;
                 case toolEraser:
                     // erase all button
@@ -193,6 +194,10 @@ int main(int argc, char **argv)
             }
             else if (pos.py > 192 - 16 && showHud)
                 hudChooseTool(pos, &tool);
+            else if (tool == toolFill && pos.py < 192 - 16 && pos.py > 16)
+            {
+                gfxFloodFill(picture, pos.px, pos.py, colors[selectedColor], gfxGetPixel(picture, pos.px, pos.py));
+            }
         }
 
         // scroll background on top screen
@@ -260,8 +265,9 @@ int main(int argc, char **argv)
             switch (tool)
             {
             case toolPencil:
-                // draw pencil colors
-                hudDrawPencilColors(selectedColor);
+            case toolFill:
+                // draw colors
+                hudDrawColors(selectedColor);
                 break;
             case toolEraser:
                 // draw erase all button

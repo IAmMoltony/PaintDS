@@ -133,3 +133,23 @@ void gfxDrawLineThickness(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 co
         }
     }
 }
+
+void gfxFloodFill(FrameBuffer fb, int x, int y, u16 color, u16 colorToFill)
+{
+    if (x < 0 || y < 0 || x > 256 || y > 192)
+        return;
+
+    if (gfxGetPixel(fb, x, y) == colorToFill)
+    {
+        gfxPutPixel(fb, x, y, color);
+        gfxFloodFill(fb, x + 1, y, color, colorToFill);
+        gfxFloodFill(fb, x - 1, y, color, colorToFill);
+        gfxFloodFill(fb, x, y + 1, color, colorToFill);
+        gfxFloodFill(fb, x, y - 1, color, colorToFill);
+    }
+}
+
+u16 gfxGetPixel(FrameBuffer fb, int x, int y)
+{
+    return fb[x + y * 256];
+}
