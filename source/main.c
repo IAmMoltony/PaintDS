@@ -12,6 +12,7 @@ typedef enum
 {
     toolPencil = 0,
     toolEraser = 1,
+    toolFill = 2,
 } Tool;
 
 FrameBuffer fb;
@@ -144,6 +145,7 @@ int main(int argc, char **argv)
     PPMImage *imgPencil = ppmLoad("nitro:/graphics/pencil.ppm");
     PPMImage *imgEraser = ppmLoad("nitro:/graphics/eraser.ppm");
     PPMImage *imgEraseAll = ppmLoad("nitro:/graphics/eraseall.ppm");
+    PPMImage *imgFill = ppmLoad("nitro:/graphics/fill.ppm");
 
     int oldTouchX = -1;
     int oldTouchY = -1;
@@ -286,6 +288,7 @@ int main(int argc, char **argv)
             // draw tool images
             ppmDraw(fb, imgPencil, 2, 192 - 14 - ((tool == toolPencil) ? 3 : 0));
             ppmDraw(fb, imgEraser, 16, 192 - 14 - ((tool == toolEraser) ? 3 : 0));
+            ppmDraw(fb, imgFill, 30, 192 - 14 - ((tool == toolFill) ? 3 : 0));
         }
 
         // copy frame buffer into bottom screen
