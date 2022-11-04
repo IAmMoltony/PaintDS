@@ -151,6 +151,7 @@ int main(int argc, char **argv)
     int oldTouchY = -1;
     u16 bgScrollX = 0;
     bool showHud = true;
+    bool eraserFill = false;
     u8 selectedColor = 0;
     u8 lineThickness = 0;
     Tool tool = toolPencil;
@@ -181,6 +182,9 @@ int main(int argc, char **argv)
                         // TODO move clearing framebuffer into its own function
                         for (int i = 0; i < 256 * 192; ++i)
                             picture[i] = WHITE;
+                    // eraser fill
+                    else if (pos.py >= 2 && pos.px >= 16 && pos.py <= 14 && pos.px <= 30)
+                        eraserFill = !eraserFill;
                     break;
                 }
 
@@ -194,9 +198,18 @@ int main(int argc, char **argv)
             }
             else if (pos.py > 192 - 16 && showHud)
                 hudChooseTool(pos, &tool);
-            else if (tool == toolFill && pos.py < 192 - 16 && pos.py > 16)
+            else if ((pos.py < 192 - 16 && pos.py > 16 && showHud) || !showHud)
             {
-                gfxFloodFill(picture, pos.px, pos.py, colors[selectedColor], gfxGetPixel(picture, pos.px, pos.py));
+                switch (tool)
+                {
+                case toolFill:
+                    gfxFloodFill(picture, pos.px, pos.py, colors[selectedColor], gfxGetPixel(picture, pos.px, pos.py));
+                    break;
+                case toolEraser:
+                    if (eraserFill)
+                        gfxFloodFill(picture, pos.px, pos.py, WHITE, gfxGetPixel(picture, pos.px, pos.py));
+                    break;
+                }
             }
         }
 
@@ -272,6 +285,11 @@ int main(int argc, char **argv)
             case toolEraser:
                 // draw erase all button
                 ppmDraw(fb, imgEraseAll, 2, 2);
+
+                // draw fill eraser button
+                ppmDraw(fb, imgFill, 16, 2);
+                if (eraserFill)
+                    gfxStrokeRect(fb, 16, 2, 12, 12, GREEN);
                 break;
             }
 
