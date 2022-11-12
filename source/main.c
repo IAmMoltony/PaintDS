@@ -17,6 +17,7 @@ typedef enum
     toolPencil = 0,
     toolEraser = 1,
     toolFill = 2,
+    toolShapes = 3,
 } Tool;
 
 FrameBuffer fb;
@@ -109,7 +110,7 @@ void hudChooseTool(touchPosition pos, Tool *tool)
     if (!(y >= 192 - 16 || y <= 192))
         return;
 
-    for (Tool i = toolPencil; i <= toolFill; ++i)
+    for (Tool i = toolPencil; i <= toolShapes; ++i)
     {
         if (x >= 2 + 15 * i && x <= 2 + 15 * i + 12)
         {
@@ -187,6 +188,7 @@ int main(int argc, char **argv)
     PPMImage *imgEraser = ppmLoad("nitro:/graphics/eraser.ppm");
     PPMImage *imgEraseAll = ppmLoad("nitro:/graphics/eraseall.ppm");
     PPMImage *imgFill = ppmLoad("nitro:/graphics/fill.ppm");
+    PPMImage *imgShapes = ppmLoad("nitro:/graphics/shapes.ppm");
     imgArrow = ppmLoad("nitro:/graphics/arrow.ppm");
 
     int oldTouchX = -1;
@@ -219,6 +221,7 @@ int main(int argc, char **argv)
                 {
                 case toolPencil:
                 case toolFill:
+                case toolShapes:
                     hudColorSelect(pos, &selectedColor);
                     break;
                 case toolEraser:
@@ -329,6 +332,7 @@ int main(int argc, char **argv)
             {
             case toolPencil:
             case toolFill:
+            case toolShapes:
                 // draw colors
                 hudDrawColors(selectedColor);
                 break;
@@ -363,6 +367,7 @@ int main(int argc, char **argv)
             ppmDraw(fb, imgPencil, 2, 192 - 14 - ((tool == toolPencil) ? 3 : 0));
             ppmDraw(fb, imgEraser, 16, 192 - 14 - ((tool == toolEraser) ? 3 : 0));
             ppmDraw(fb, imgFill, 30, 192 - 14 - ((tool == toolFill) ? 3 : 0));
+            ppmDraw(fb, imgShapes, 44, 192 - 14 - ((tool == toolShapes) ? 3 : 0));
         }
 
         // copy frame buffer into bottom screen
