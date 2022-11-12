@@ -1,9 +1,11 @@
 #include <nds.h>
 #include <fat.h>
 #include <filesystem.h>
+#include <maxmod9.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include "soundbank.h"
 #include "colors.h"
 #include "ppm.h"
 #include "background.h"
@@ -146,6 +148,16 @@ int main(int argc, char **argv)
         mkdir("paintds_data", 0700);
     chdir("paintds_data");
 
+    mmInitDefault("nitro:/soundbank.bin");
+
+    mmLoadEffect(SFX_PENCIL);
+    mm_sound_effect sndPencil = {
+        {SFX_PENCIL},
+        (int)(1.0f * (1 << 10)),
+        0,
+        255,
+        128};
+
     videoSetMode(MODE_5_2D);
     videoSetModeSub(MODE_5_2D);
 
@@ -184,9 +196,12 @@ int main(int argc, char **argv)
     bool eraserFill = false;
     u8 selectedColor = 0;
     u8 lineThickness = 0;
+    u16 frames = 0;
     Tool tool = toolPencil;
     while (true)
     {
+        ++frames;
+
         scanKeys();
         u32 kdown = keysDown();
 
@@ -254,6 +269,7 @@ int main(int argc, char **argv)
         {
             touchPosition pos;
             touchRead(&pos);
+
             if (!((pos.py < 16 || pos.py > 192 - 16) && showHud))
             {
                 int x1 = (oldTouchX == -1) ? pos.px : oldTouchX;
@@ -284,6 +300,10 @@ int main(int argc, char **argv)
                     break;
                 }
             }
+
+            if (!(pos.px == oldTouchX && pos.py == oldTouchY) &&
+                ((showHud) ? (pos.py > 16 && pos.py < 256 - 16) : true))
+                mmEffectEx(&sndPencil);
 
             oldTouchX = pos.px;
             oldTouchY = pos.py;

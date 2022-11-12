@@ -25,14 +25,74 @@ SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 GRAPHICS	:=	gfx
+AUDIO       :=  audio
 NITRODATA   :=  nitrofs
+
+CURDIR_BASENAME := $(shell basename $(CURDIR))
+ifeq ($(CURDIR_BASENAME),build)
+SOUNDBANK := ../$(NITRODATA)/soundbank.bin
+else
+SOUNDBANK := $(NITRODATA)/soundbank.bin
+endif
 
 GAME_ICON      := ../icon.bmp
 GAME_TITLE     := Paint DS
 GAME_SUBTITLE1 := Nintendo DS painting app
 GAME_SUBTITLE2 := github.com/IAmMoltony
 
-include $(DEVKITARM)/ds_rules
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPro)
+endif
+
+include $(DEVKITARM)/base_rules
+
+PORTLIBS	:=	$(PORTLIBS_PATH)/nds $(PORTLIBS_PATH)/armv5te
+LIBNDS		:=	$(DEVKITPRO)/libnds
+
+ifeq ($(strip $(GAME_TITLE)),)
+GAME_TITLE	:=	$(notdir $(OUTPUT))
+endif
+
+ifeq ($(strip $(GAME_SUBTITLE1)),)
+GAME_SUBTITLE1	:=	built with devkitARM
+endif
+
+ifeq ($(strip $(GAME_SUBTITLE2)),)
+GAME_SUBTITLE2	:=	http://devkitpro.org
+endif
+
+ifeq ($(strip $(GAME_ICON)),)
+GAME_ICON      :=      $(DEVKITPRO)/libnds/icon.bmp
+endif
+
+ifneq ($(strip $(NITRO_FILES)),)
+_ADDFILES	:=	-d $(NITRO_FILES)
+endif
+
+#---------------------------------------------------------------------------------
+%.nds: %.arm9
+	$(SILENTCMD)ndstool -c $@ -9 $< -b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" $(_ADDFILES)
+	@echo built ... $(notdir $@)
+
+#---------------------------------------------------------------------------------
+%.nds: %.elf
+	$(SILENTCMD)ndstool -c $@ -9 $< -b $(GAME_ICON) "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" $(_ADDFILES)
+	$(SILENTMSG) built ... $(notdir $@)
+
+#---------------------------------------------------------------------------------
+%.arm9: %.elf
+	$(SILENTCMD)$(OBJCOPY) -O binary $< $@
+	$(SILENTMSG) built ... $(notdir $@)
+
+#---------------------------------------------------------------------------------
+%.arm7: %.elf
+	$(SILENTCMD)$(OBJCOPY) -O binary $< $@
+	$(SILENTMSG) built ... $(notdir $@)
+
+#---------------------------------------------------------------------------------
+%.elf: $(SOUNDBANK)
+	$(SILENTMSG) linking $(notdir $@)
+	$(SILENTCMD)$(LD) $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -92,6 +152,8 @@ BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 BMPFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.bmp)))
 PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
 
+export AUDIOFILES := $(foreach dir,$(notdir $(wildcard $(AUDIO)/*.wav)),$(CURDIR)/$(AUDIO)/$(dir))
+
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
@@ -105,8 +167,6 @@ else
 #---------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------
-
-export OFILES_BIN   :=	$(addsuffix .o,$(BINFILES))
 
 export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
@@ -130,7 +190,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(SOUNDBANK)
 
 #---------------------------------------------------------------------------------
 EMULATOR := ~/melonDS
@@ -162,6 +222,10 @@ $(OUTPUT).elf	:	$(OFILES)
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
+
+$(SOUNDBANK): $(AUDIOFILES)
+	@echo $(notdir $@)
+	@mmutil $^ -o$@ -hsoundbank.h -d
 
 #---------------------------------------------------------------------------------
 # This rule creates assembly source files using grit
