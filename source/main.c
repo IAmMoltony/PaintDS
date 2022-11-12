@@ -176,12 +176,8 @@ int main(int argc, char **argv)
     fb = malloc(256 * 192 * sizeof(u16));
     picture = malloc(256 * 192 * sizeof(u16));
 
-    // clear buffers
-    for (int i = 0; i < 256 * 192; ++i)
-    {
-        fb[i] = WHITE;
-        picture[i] = WHITE;
-    }
+    gfxClear(fb, WHITE);
+    gfxClear(picture, WHITE);
 
     // load some assets
     PPMImage *imgPencil = ppmLoad("nitro:/graphics/pencil.ppm");
@@ -227,9 +223,7 @@ int main(int argc, char **argv)
                 case toolEraser:
                     // erase all button
                     if (pos.py >= 2 && pos.px >= 2 && pos.py <= 14 && pos.px <= 14)
-                        // TODO move clearing framebuffer into its own function
-                        for (int i = 0; i < 256 * 192; ++i)
-                            picture[i] = WHITE;
+                        gfxClear(picture, WHITE);
                     // eraser fill
                     else if (pos.py >= 2 && pos.px >= 16 && pos.py <= 14 && pos.px <= 30)
                         eraserFill = !eraserFill;

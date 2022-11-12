@@ -8,6 +8,12 @@ void gfxPutPixel(FrameBuffer fb, int x, int y, u16 color)
     fb[x + y * 256] = color;
 }
 
+void gfxClear(FrameBuffer fb, u16 color)
+{
+    for (int i = 0; i < 256 * 192; ++i)
+        fb[i] = color;
+}
+
 void gfxFillRect(FrameBuffer fb, int x, int y, int w, int h, u16 color)
 {
     for (int i = 0; i < w; ++i)
