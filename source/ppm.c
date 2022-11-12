@@ -115,3 +115,28 @@ void ppmDraw(FrameBuffer fb, PPMImage *img, int x, int y)
             fb[(i + x) + (j + y) * SCREEN_WIDTH] = color;
         }
 }
+
+static void swapPPMpx(PPMPixel *a, PPMPixel *b)
+{
+    PPMPixel c = *a;
+    *a = *b;
+    *b = c;
+}
+
+static void rotateImgHoriz(PPMImage *img)
+{
+    for (int row = 0; row < img->h; ++row)
+    {
+        for (int i = 0; i < img->w / 2; ++i)
+        {
+            swapPPMpx(&img->pixels[img->w * row + i], &img->pixels[img->w * row + img->w - 1 - i]);
+        }
+    }
+}
+
+void ppmDrawMirrorX(FrameBuffer fb, PPMImage *img, int x, int y)
+{
+    rotateImgHoriz(img);
+    ppmDraw(fb, img, x, y);
+    rotateImgHoriz(img);
+}

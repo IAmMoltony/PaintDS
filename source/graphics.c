@@ -136,6 +136,9 @@ void gfxDrawLineThickness(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 co
 
 void gfxFloodFill(FrameBuffer fb, int x, int y, u16 color, u16 colorToFill)
 {
+    if (colorToFill == color)
+        return;
+
     if (x < 0 || y < 0 || x > 256 || y > 192)
         return;
 

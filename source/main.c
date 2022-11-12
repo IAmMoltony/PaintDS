@@ -7,6 +7,8 @@
 #include "colors.h"
 #include "ppm.h"
 #include "background.h"
+#define COLORS_PER_PAGE 7
+#define MAX_COLOR_PAGE 1
 
 typedef enum
 {
@@ -19,22 +21,28 @@ FrameBuffer fb;
 FrameBuffer picture;
 
 u16 colors[] = {
-    BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW};
+    BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW,
+    GRAY, DARKRED, DARKGREEN, DARKBLUE, DARKCYAN, DARKMAGENTA, DARKYELLOW};
 
-const u8 colorCount = sizeof(colors) / sizeof(colors[0]);
+static PPMImage *imgArrow;
+
+u8 colorPage = 0;
 
 void hudDrawColors(u8 selected)
 {
-    for (u8 i = 0; i < colorCount; ++i)
+    for (u8 i = 0; i < COLORS_PER_PAGE; ++i)
     {
-        u16 color = colors[i];
+        u16 color = colors[colorPage * COLORS_PER_PAGE + i];
 
         gfxFillRect(fb, 10 + 15 * i, 2, 12, 12, color);
-        if (selected == i)
+        if (selected == colorPage * COLORS_PER_PAGE + i)
             gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, GREEN);
         else
             gfxStrokeRect(fb, 10 + 15 * i, 2, 12, 12, BLACK);
     }
+
+    ppmDraw(fb, imgArrow, 3, 3);
+    ppmDrawMirrorX(fb, imgArrow, 114, 3);
 }
 
 void hudColorSelect(touchPosition pos, u8 *selectedColor)
@@ -44,11 +52,32 @@ void hudColorSelect(touchPosition pos, u8 *selectedColor)
     if (!(y <= 14 || y >= 2))
         return;
 
-    for (u8 i = 0; i < colorCount; ++i)
+    // scroll back button
+    if (x >= 3 && y >= 3 && x <= 3 + imgArrow->w && y <= 3 + imgArrow->h)
+    {
+        if (colorPage - 1 < 0)
+            colorPage = MAX_COLOR_PAGE;
+        else
+            --colorPage;
+        *selectedColor = colorPage * COLORS_PER_PAGE;
+        return;
+    }
+    // scroll forward button
+    else if (x >= 114 && y >= 3 && x <= 114 + imgArrow->w && y <= 3 + imgArrow->h)
+    {
+        if (colorPage + 1 > MAX_COLOR_PAGE)
+            colorPage = 0;
+        else
+            ++colorPage;
+        *selectedColor = colorPage * COLORS_PER_PAGE;
+        return;
+    }
+
+    for (u8 i = 0; i < COLORS_PER_PAGE; ++i)
     {
         if (x >= 10 + 15 * i && x <= 10 + 15 * i + 12)
         {
-            *selectedColor = i;
+            *selectedColor = colorPage * COLORS_PER_PAGE + i;
             return;
         }
     }
@@ -146,6 +175,7 @@ int main(int argc, char **argv)
     PPMImage *imgEraser = ppmLoad("nitro:/graphics/eraser.ppm");
     PPMImage *imgEraseAll = ppmLoad("nitro:/graphics/eraseall.ppm");
     PPMImage *imgFill = ppmLoad("nitro:/graphics/fill.ppm");
+    imgArrow = ppmLoad("nitro:/graphics/arrow.ppm");
 
     int oldTouchX = -1;
     int oldTouchY = -1;
