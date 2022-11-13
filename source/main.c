@@ -165,9 +165,13 @@ int main(int argc, char **argv)
     vramSetBankA(VRAM_A_MAIN_BG);
     vramSetBankC(VRAM_C_SUB_BG);
 
-    int bgTop = bgInit(2, BgType_Bmp8, BgSize_B8_512x256, 0, 0);
-    dmaCopy(backgroundBitmap, bgGetGfxPtr(bgTop), 512 * 192);
-    dmaCopy(backgroundPal, BG_PALETTE, 256 * 2);
+    PrintConsole consoleTop;
+    consoleInit(&consoleTop, 1, BgType_Text4bpp, BgSize_T_256x256, 31, 0, true, true);
+    consoleSelect(&consoleTop);
+
+    // int bgTop = bgInit(2, BgType_Bmp8, BgSize_B8_512x256, 0, 0);
+    // dmaCopy(backgroundBitmap, bgGetGfxPtr(bgTop), 512 * 192);
+    // dmaCopy(backgroundPal, BG_PALETTE, 256 * 2);
 
     int bgSub = bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
     FrameBuffer vramSub = bgGetGfxPtr(bgSub);
@@ -189,6 +193,9 @@ int main(int argc, char **argv)
 
     int oldTouchX = -1;
     int oldTouchY = -1;
+    int shapesStartX = -1;
+    int shapesStartY = -1;
+    touchPosition shapesTouchPos = {0, 0, 0, 0, 0, 0};
     u16 bgScrollX = 0;
     bool showHud = true;
     bool eraserFill = false;
@@ -256,10 +263,10 @@ int main(int argc, char **argv)
         }
 
         // scroll background on top screen
-        bgSetScroll(bgTop, bgScrollX++, 0);
-        if (bgScrollX > 255)
-            bgScrollX = 0;
-        bgUpdate();
+        // bgSetScroll(bgTop, bgScrollX++, 0);
+        // if (bgScrollX > 255)
+        //     bgScrollX = 0;
+        // bgUpdate();
 
         // draw stuff if touching the screen
         if (keysHeld() & KEY_TOUCH)
@@ -295,11 +302,20 @@ int main(int argc, char **argv)
                 case toolEraser:
                     gfxDrawLineThickness(picture, x1, y1, pos.px, pos.py, WHITE, thickness);
                     break;
+                case toolShapes:
+                    touchRead(&shapesTouchPos);
+                    if (shapesStartX == -1 || shapesStartY == -1)
+                    {
+                        shapesStartX = pos.px;
+                        shapesStartY = pos.py;
+                    }
+                    break;
                 }
             }
 
-            if (!(pos.px == oldTouchX && pos.py == oldTouchY) &&
-                ((showHud) ? (pos.py > 16 && pos.py < 256 - 16) : true))
+            if (!(pos.px == oldTouchX && pos.py == oldTouchY) &&    // if we arent just holding in one position
+                !((pos.py < 16 || pos.py > 192 - 16) && showHud) && // and if we are showing HUD, ignore touching it
+                tool != toolShapes && tool != toolFill)             // and these tools cant produce pencil sfx
                 mmEffectEx(&sndPencil);
 
             oldTouchX = pos.px;
@@ -307,6 +323,25 @@ int main(int argc, char **argv)
         }
         else
             oldTouchX = oldTouchY = -1;
+
+        if (keysUp() & KEY_TOUCH)
+        {
+            switch (tool)
+            {
+            case toolShapes:
+                if (shapesStartX != -1 && shapesStartY != -1)
+                {
+                    touchPosition pos = shapesTouchPos;
+
+                    for (int i = shapesStartX; i <= pos.px; ++i)
+                        for (int j = shapesStartY; j <= pos.py; ++j)
+                            gfxPutPixel(picture, i, j, colors[selectedColor]);
+                    shapesStartX = -1;
+                    shapesStartY = -1;
+                }
+                break;
+            }
+        }
 
         // copy picture buffer into frame buffer
         for (int x = 0; x < 256; ++x)
