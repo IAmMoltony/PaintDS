@@ -165,13 +165,9 @@ int main(int argc, char **argv)
     vramSetBankA(VRAM_A_MAIN_BG);
     vramSetBankC(VRAM_C_SUB_BG);
 
-    PrintConsole consoleTop;
-    consoleInit(&consoleTop, 1, BgType_Text4bpp, BgSize_T_256x256, 31, 0, true, true);
-    consoleSelect(&consoleTop);
-
-    // int bgTop = bgInit(2, BgType_Bmp8, BgSize_B8_512x256, 0, 0);
-    // dmaCopy(backgroundBitmap, bgGetGfxPtr(bgTop), 512 * 192);
-    // dmaCopy(backgroundPal, BG_PALETTE, 256 * 2);
+    int bgTop = bgInit(2, BgType_Bmp8, BgSize_B8_512x256, 0, 0);
+    dmaCopy(backgroundBitmap, bgGetGfxPtr(bgTop), 512 * 192);
+    dmaCopy(backgroundPal, BG_PALETTE, 256 * 2);
 
     int bgSub = bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
     FrameBuffer vramSub = bgGetGfxPtr(bgSub);
@@ -263,10 +259,10 @@ int main(int argc, char **argv)
         }
 
         // scroll background on top screen
-        // bgSetScroll(bgTop, bgScrollX++, 0);
-        // if (bgScrollX > 255)
-        //     bgScrollX = 0;
-        // bgUpdate();
+        bgSetScroll(bgTop, bgScrollX++, 0);
+        if (bgScrollX > 255)
+            bgScrollX = 0;
+        bgUpdate();
 
         // draw stuff if touching the screen
         if (keysHeld() & KEY_TOUCH)
