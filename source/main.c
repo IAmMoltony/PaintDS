@@ -395,6 +395,15 @@ int main(int argc, char **argv)
             ppmDraw(fb, imgShapes, 44, 192 - 14 - ((tool == toolShapes) ? 3 : 0));
         }
 
+        if (tool == toolShapes && shapesStartX != -1 && shapesStartY != -1)
+        {
+            touchPosition pos = shapesTouchPos;
+
+            for (int i = shapesStartX; i <= pos.px; ++i)
+                for (int j = shapesStartY; j <= pos.py; ++j)
+                    gfxPutPixel(fb, i, j, colors[selectedColor]);
+        }
+
         // copy frame buffer into bottom screen
         for (int x = 0; x < 256; ++x)
             for (int y = 0; y < 192; ++y)
