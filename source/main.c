@@ -196,6 +196,9 @@ int main(int argc, char **argv)
     bool showHud = true;
     bool eraserFill = false;
     u8 selectedColor = 0;
+    u8 shapesSelectedShape = 0; // 0 = filled square
+                                // 1 = not filled square
+                                // 2 = line
     u8 lineThickness = 0;
     u16 frames = 0;
     Tool tool = toolPencil;
@@ -249,6 +252,8 @@ int main(int argc, char **argv)
                 {
                 case toolFill:
                     gfxFloodFill(picture, pos.px, pos.py, colors[selectedColor], gfxGetPixel(picture, pos.px, pos.py));
+                    ppmUnload(imgArrow);
+                    ppmLoad("nitro:/graphics/arrow.ppm");
                     break;
                 case toolEraser:
                     if (eraserFill)
