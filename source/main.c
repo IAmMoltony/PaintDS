@@ -120,6 +120,26 @@ void hudChooseTool(touchPosition pos, Tool *tool)
     }
 }
 
+#
+
+void hudShapeSelect(touchPosition pos, u8 *shape)
+{
+    u16 x = pos.px;
+    u16 y = pos.py;
+    if (!(y >= 2 && y <= 14))
+        return;
+
+    for (u8 i = 0; i < 3; ++i)
+    {
+        u8 btnPos = 242 - (i + 1) * 14;
+        if (x >= btnPos && x <= btnPos + 12)
+        {
+            *shape = i;
+            return;
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     if (!nitroFSInit(NULL))
@@ -186,6 +206,9 @@ int main(int argc, char **argv)
     PPMImage *imgFill = ppmLoad("nitro:/graphics/fill.ppm");
     PPMImage *imgShapes = ppmLoad("nitro:/graphics/shapes.ppm");
     imgArrow = ppmLoad("nitro:/graphics/arrow.ppm");
+    PPMImage *imgFilledSquare = ppmLoad("nitro:/graphics/filledsquare.ppm");
+    PPMImage *imgNotFilledSquare = ppmLoad("nitro:/graphics/notfilledsquare.ppm");
+    PPMImage *imgLine = ppmLoad("nitro:/graphics/line.ppm");
 
     int oldTouchX = -1;
     int oldTouchY = -1;
@@ -242,6 +265,9 @@ int main(int argc, char **argv)
                 case toolEraser:
                     hudLineThicknessSelect(pos, &lineThickness);
                     break;
+                case toolShapes:
+                    hudShapeSelect(pos, &shapesSelectedShape);
+                    break;
                 }
             }
             else if (pos.py > 192 - 16 && showHud)
@@ -252,6 +278,7 @@ int main(int argc, char **argv)
                 {
                 case toolFill:
                     gfxFloodFill(picture, pos.px, pos.py, colors[selectedColor], gfxGetPixel(picture, pos.px, pos.py));
+
                     ppmUnload(imgArrow);
                     ppmLoad("nitro:/graphics/arrow.ppm");
                     break;
@@ -390,6 +417,14 @@ int main(int argc, char **argv)
 
                 gfxStrokeRect(fb, 256 - 14, 2, 12, 12, lineThickness == 2 ? GREEN : BLACK);
                 gfxFillRect(fb, 256 - 12, 4, 8, 8, colors[selectedColor]);
+                break;
+            case toolShapes:
+                // draw shape images
+                ppmDraw(fb, imgFilledSquare, 242, 2);
+                gfxStrokeRect(fb, 242, 2, 12, 12, (shapesSelectedShape == 0) ? GREEN : BLACK);
+
+                ppmDraw(fb, imgNotFilledSquare, 228, 2);
+                ppmDraw(fb, imgLine, 214, 2);
                 break;
             }
 
