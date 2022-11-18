@@ -362,16 +362,52 @@ int main(int argc, char **argv)
                     switch (shapesSelectedShape)
                     {
                     case 0: // filled rect
-                        for (int i = shapesStartX; i <= pos.px; ++i)
-                            for (int j = shapesStartY; j <= pos.py; ++j)
+                    {
+                        int startX = shapesStartX;
+                        int startY = shapesStartY;
+                        int endX = pos.px;
+                        int endY = pos.py;
+                        if (startX > endX)
+                        {
+                            int temp = startX;
+                            startX = endX;
+                            endX = temp;
+                        }
+                        if (startY > endY)
+                        {
+                            int temp = startY;
+                            startY = endY;
+                            endY = temp;
+                        }
+                        for (int i = startX; i <= endX; ++i)
+                            for (int j = startY; j <= endY; ++j)
                                 gfxPutPixel(picture, i, j, colors[selectedColor]);
                         break;
+                    }
                     case 1: // not filled rect
-                        for (int i = shapesStartX; i <= pos.px; ++i)
-                            for (int j = shapesStartY; j <= pos.py; ++j)
+                    {
+                        int startX = shapesStartX;
+                        int startY = shapesStartY;
+                        int endX = pos.px;
+                        int endY = pos.py;
+                        if (startX > endX)
+                        {
+                            int temp = startX;
+                            startX = endX;
+                            endX = temp;
+                        }
+                        if (startY > endY)
+                        {
+                            int temp = startY;
+                            startY = endY;
+                            endY = temp;
+                        }
+                        for (int i = startX; i <= endX; ++i)
+                            for (int j = startY; j <= endY; ++j)
                                 if (i == shapesStartX || i == pos.px || j == shapesStartY || j == pos.py)
                                     gfxPutPixel(picture, i, j, colors[selectedColor]);
                         break;
+                    }
                     case 2: // line
                         gfxDrawLine(picture, shapesStartX, shapesStartY, pos.px, pos.py, colors[selectedColor]);
                         break;
@@ -457,16 +493,52 @@ int main(int argc, char **argv)
             switch (shapesSelectedShape)
             {
             case 0: // filled rect
-                for (int i = shapesStartX; i <= pos.px; ++i)
-                    for (int j = shapesStartY; j <= pos.py; ++j)
+            {
+                int startX = shapesStartX;
+                int startY = shapesStartY;
+                int endX = pos.px;
+                int endY = pos.py;
+                if (startX > endX)
+                {
+                    int temp = startX;
+                    startX = endX;
+                    endX = temp;
+                }
+                if (startY > endY)
+                {
+                    int temp = startY;
+                    startY = endY;
+                    endY = temp;
+                }
+                for (int i = startX; i <= endX; ++i)
+                    for (int j = startY; j <= endY; ++j)
                         gfxPutPixel(fb, i, j, colors[selectedColor]);
                 break;
+            }
             case 1: // not filled rect
-                for (int i = shapesStartX; i <= pos.px; ++i)
-                    for (int j = shapesStartY; j <= pos.py; ++j)
+            {
+                int startX = shapesStartX;
+                int startY = shapesStartY;
+                int endX = pos.px;
+                int endY = pos.py;
+                if (startX > endX)
+                {
+                    int temp = startX;
+                    startX = endX;
+                    endX = temp;
+                }
+                if (startY > endY)
+                {
+                    int temp = startY;
+                    startY = endY;
+                    endY = temp;
+                }
+                for (int i = startX; i <= endX; ++i)
+                    for (int j = startY; j <= endY; ++j)
                         if (i == shapesStartX || i == pos.px || j == shapesStartY || j == pos.py)
                             gfxPutPixel(fb, i, j, colors[selectedColor]);
                 break;
+            }
             case 2: // line
                 gfxDrawLine(fb, shapesStartX, shapesStartY, pos.px, pos.py, colors[selectedColor]);
                 break;
