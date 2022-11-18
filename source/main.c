@@ -120,8 +120,6 @@ void hudChooseTool(touchPosition pos, Tool *tool)
     }
 }
 
-#
-
 void hudShapeSelect(touchPosition pos, u8 *shape)
 {
     u16 x = pos.px;
@@ -131,7 +129,7 @@ void hudShapeSelect(touchPosition pos, u8 *shape)
 
     for (u8 i = 0; i < 3; ++i)
     {
-        u8 btnPos = 242 - (i + 1) * 14;
+        u8 btnPos = 242 - i * 14;
         if (x >= btnPos && x <= btnPos + 12)
         {
             *shape = i;
@@ -361,9 +359,23 @@ int main(int argc, char **argv)
                 {
                     touchPosition pos = shapesTouchPos;
 
-                    for (int i = shapesStartX; i <= pos.px; ++i)
-                        for (int j = shapesStartY; j <= pos.py; ++j)
-                            gfxPutPixel(picture, i, j, colors[selectedColor]);
+                    switch (shapesSelectedShape)
+                    {
+                    case 0: // filled rect
+                        for (int i = shapesStartX; i <= pos.px; ++i)
+                            for (int j = shapesStartY; j <= pos.py; ++j)
+                                gfxPutPixel(picture, i, j, colors[selectedColor]);
+                        break;
+                    case 1: // not filled rect
+                        for (int i = shapesStartX; i <= pos.px; ++i)
+                            for (int j = shapesStartY; j <= pos.py; ++j)
+                                if (i == shapesStartX || i == pos.px || j == shapesStartY || j == pos.py)
+                                    gfxPutPixel(picture, i, j, colors[selectedColor]);
+                        break;
+                    case 2: // line
+                        gfxDrawLine(picture, shapesStartX, shapesStartY, pos.px, pos.py, colors[selectedColor]);
+                        break;
+                    }
                     shapesStartX = -1;
                     shapesStartY = -1;
                 }
@@ -424,7 +436,10 @@ int main(int argc, char **argv)
                 gfxStrokeRect(fb, 242, 2, 12, 12, (shapesSelectedShape == 0) ? GREEN : BLACK);
 
                 ppmDraw(fb, imgNotFilledSquare, 228, 2);
+                gfxStrokeRect(fb, 228, 2, 12, 12, (shapesSelectedShape == 1) ? GREEN : BLACK);
+
                 ppmDraw(fb, imgLine, 214, 2);
+                gfxStrokeRect(fb, 214, 2, 12, 12, (shapesSelectedShape == 2) ? GREEN : BLACK);
                 break;
             }
 
@@ -439,9 +454,23 @@ int main(int argc, char **argv)
         {
             touchPosition pos = shapesTouchPos;
 
-            for (int i = shapesStartX; i <= pos.px; ++i)
-                for (int j = shapesStartY; j <= pos.py; ++j)
-                    gfxPutPixel(fb, i, j, colors[selectedColor]);
+            switch (shapesSelectedShape)
+            {
+            case 0: // filled rect
+                for (int i = shapesStartX; i <= pos.px; ++i)
+                    for (int j = shapesStartY; j <= pos.py; ++j)
+                        gfxPutPixel(fb, i, j, colors[selectedColor]);
+                break;
+            case 1: // not filled rect
+                for (int i = shapesStartX; i <= pos.px; ++i)
+                    for (int j = shapesStartY; j <= pos.py; ++j)
+                        if (i == shapesStartX || i == pos.px || j == shapesStartY || j == pos.py)
+                            gfxPutPixel(fb, i, j, colors[selectedColor]);
+                break;
+            case 2: // line
+                gfxDrawLine(fb, shapesStartX, shapesStartY, pos.px, pos.py, colors[selectedColor]);
+                break;
+            }
         }
 
         // copy frame buffer into bottom screen
