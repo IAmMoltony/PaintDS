@@ -127,7 +127,7 @@ void hudShapeSelect(touchPosition pos, u8 *shape)
     if (!(y >= 2 && y <= 14))
         return;
 
-    for (u8 i = 0; i < 3; ++i)
+    for (u8 i = 0; i < 5; ++i)
     {
         u8 btnPos = 242 - i * 14;
         if (x >= btnPos && x <= btnPos + 12)
@@ -207,6 +207,8 @@ int main(int argc, char **argv)
     PPMImage *imgFilledSquare = ppmLoad("nitro:/graphics/filledsquare.ppm");
     PPMImage *imgNotFilledSquare = ppmLoad("nitro:/graphics/notfilledsquare.ppm");
     PPMImage *imgLine = ppmLoad("nitro:/graphics/line.ppm");
+    PPMImage *imgNotfIlledTriangle = ppmLoad("nitro:/graphics/notfilledtriangle.ppm");
+    PPMImage *imgFilledTriangle = ppmLoad("nitro:/graphics/filledtriangle.ppm");
 
     int oldTouchX = -1;
     int oldTouchY = -1;
@@ -220,6 +222,8 @@ int main(int argc, char **argv)
     u8 shapesSelectedShape = 0; // 0 = filled square
                                 // 1 = not filled square
                                 // 2 = line
+                                // 3 = filled triangle
+                                // 4 = not filled triangle
     u8 lineThickness = 0;
     u16 frames = 0;
     Tool tool = toolPencil;
@@ -476,6 +480,12 @@ int main(int argc, char **argv)
 
                 ppmDraw(fb, imgLine, 214, 2);
                 gfxStrokeRect(fb, 214, 2, 12, 12, (shapesSelectedShape == 2) ? GREEN : BLACK);
+
+                ppmDraw(fb, imgFilledTriangle, 200, 2);
+                gfxStrokeRect(fb, 200, 2, 12, 12, (shapesSelectedShape == 3) ? GREEN : BLACK);
+
+                ppmDraw(fb, imgNotfIlledTriangle, 186, 2);
+                gfxStrokeRect(fb, 186, 2, 12, 12, (shapesSelectedShape == 4) ? GREEN : BLACK);
                 break;
             }
 

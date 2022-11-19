@@ -11,6 +11,8 @@ void gfxFillRect(FrameBuffer fb, int x, int y, int w, int h, u16 color);
 void gfxStrokeRect(FrameBuffer fb, int x, int y, int w, int h, u16 color);
 void gfxDrawLine(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color);
 void gfxDrawLineThickness(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 color, u8 thickness);
+void gfxDrawTriangle(FrameBuffer fb, int x1, int y1, int x2, int y2, int x3, int y3, u16 color);
+void gfxFillTriangle(FrameBuffer fb, int x1, int y1, int x2, int y2, int x3, int y3, u16 color);
 void gfxFloodFill(FrameBuffer fb, int x, int y, u16 color, u16 colorToFill);
 
 u16 gfxGetPixel(FrameBuffer fb, int x, int y);

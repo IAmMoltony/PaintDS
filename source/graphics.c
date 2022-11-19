@@ -140,6 +140,133 @@ void gfxDrawLineThickness(FrameBuffer fb, int x1, int y1, int x2, int y2, u16 co
     }
 }
 
+void gfxDrawTriangle(FrameBuffer fb, int x1, int y1, int x2, int y2, int x3, int y3, u16 color)
+{
+    gfxDrawLine(fb, x1, y1, x2, y2, color);
+    gfxDrawLine(fb, x2, y2, x3, y3, color);
+    gfxDrawLine(fb, x3, y3, x1, y1, color);
+}
+
+typedef struct
+{
+    int x1, y1, x2, y2;
+} TriangleEdge;
+
+typedef struct
+{
+    int x1, x2;
+} TriangleSpan;
+
+static TriangleEdge createTriangleEdge(int x1, int y1, int x2, int y2)
+{
+    TriangleEdge e;
+
+    if (y1 < y2)
+    {
+        e.x1 = x1;
+        e.y1 = y1;
+        e.x2 = x2;
+        e.y2 = y2;
+    }
+    else
+    {
+        e.x1 = x2;
+        e.y1 = y2;
+        e.x2 = x1;
+        e.y2 = y1;
+    }
+
+    return e;
+}
+
+static TriangleSpan createTriangleSpan(int x1, int x2)
+{
+    TriangleSpan s;
+
+    if (x1 < x2)
+    {
+        s.x1 = x1;
+        s.x2 = x2;
+    }
+    else
+    {
+        s.x1 = x2;
+        s.x2 = x1;
+    }
+
+    return s;
+}
+
+void drawSpan(FrameBuffer fb, u16 color, TriangleSpan span, int y)
+{
+    int xDiff = span.x2 - span.x1;
+    if (!xDiff)
+        return;
+
+    for (int x = span.x1; x < span.x2; ++x)
+        gfxPutPixel(fb, x, y, color);
+}
+
+void drawSpansBetweenEdges(FrameBuffer fb, u16 color, TriangleEdge e1, TriangleEdge e2)
+{
+    float e1ydiff = (float)(e1.y2 - e1.y1);
+    if (!e1ydiff)
+        return;
+
+    float e2ydiff = (float)(e2.y2 - e2.y1);
+    if (!e2ydiff)
+        return;
+
+    float e1xdiff = (float)(e1.x2 - e1.x1);
+    float e2xdiff = (float)(e2.x2 - e2.x1);
+
+    float fact1 = (float)(e2.y1 - e1.y1) / e1ydiff;
+    float factStep1 = 1.0f / e1ydiff;
+    float fact2 = 0.0f;
+    float factStep2 = 1.0f / e2ydiff;
+
+    for (int y = e2.y1; y < e2.y2; ++y)
+    {
+        TriangleSpan span = createTriangleSpan(e1.x1 + (int)(e1xdiff * fact1), e2.x1 + (int)(e2xdiff * fact2));
+        drawSpan(fb, color, span, y);
+
+        fact1 += factStep1;
+        fact2 += factStep2;
+    }
+}
+
+void gfxFillTriangle(FrameBuffer fb, int x1, int y1, int x2, int y2, int x3, int y3, u16 color)
+{
+    // i spent like an hour tryna find this implementation
+    // original https://joshbeam.com/articles/triangle_rasterization/
+    // rewritten a bit to work in c
+
+    TriangleEdge edges[3] = {
+        createTriangleEdge(x1, y1, x2, y2),
+        createTriangleEdge(x2, y2, x3, y3),
+        createTriangleEdge(x3, y3, x1, y1),
+
+    };
+
+    int maxLen = 0;
+    int longEdge = 0;
+    for (int i = 0; i < 3; ++i)
+    {
+        int len = edges[i].y2 - edges[i].y1;
+        if (len > maxLen)
+        {
+            maxLen = len;
+            longEdge = i;
+        }
+    }
+
+    int shortEdge1 = (longEdge + 1) % 3;
+    int shortEdge2 = (longEdge + 2) % 3;
+
+    drawSpansBetweenEdges(fb, color, edges[longEdge], edges[shortEdge1]);
+    drawSpansBetweenEdges(fb, color, edges[longEdge], edges[shortEdge2]);
+}
+
 void gfxFloodFill(FrameBuffer fb, int x, int y, u16 color, u16 colorToFill)
 {
     if (colorToFill == color)
