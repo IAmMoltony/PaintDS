@@ -415,6 +415,12 @@ int main(int argc, char **argv)
                     case 2: // line
                         gfxDrawLine(picture, shapesStartX, shapesStartY, pos.px, pos.py, colors[selectedColor]);
                         break;
+                    case 3: // filled triangle
+                        gfxFillTriangle(picture, shapesStartX + (pos.px - shapesStartX) / 2, shapesStartY, shapesStartX, pos.py, pos.px, pos.py, colors[selectedColor]);
+                        break;
+                    case 4: // not filled triangle
+                        gfxDrawTriangle(picture, shapesStartX + (pos.px - shapesStartX) / 2, shapesStartY, shapesStartX, pos.py, pos.px, pos.py, colors[selectedColor]);
+                        break;
                     }
                     shapesStartX = -1;
                     shapesStartY = -1;
@@ -551,6 +557,12 @@ int main(int argc, char **argv)
             }
             case 2: // line
                 gfxDrawLine(fb, shapesStartX, shapesStartY, pos.px, pos.py, colors[selectedColor]);
+                break;
+            case 3: // filled triangle
+                gfxFillTriangle(fb, shapesStartX + (pos.px - shapesStartX) / 2, shapesStartY, shapesStartX, pos.py, pos.px, pos.py, colors[selectedColor]);
+                break;
+            case 4: // not filled triangle
+                gfxDrawTriangle(fb, shapesStartX + (pos.px - shapesStartX) / 2, shapesStartY, shapesStartX, pos.py, pos.px, pos.py, colors[selectedColor]);
                 break;
             }
         }
