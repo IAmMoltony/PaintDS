@@ -289,3 +289,23 @@ u16 gfxGetPixel(FrameBuffer fb, int x, int y)
 {
     return fb[x + y * 256];
 }
+
+void gfxWriteFrameBuffer(FrameBuffer fb, const char *filename)
+{
+    FILE *file = fopen(filename, "wb+");
+    if (!file)
+        systemShutDown();
+
+    fwrite(fb, sizeof(u16), 256 * 192, file);
+    fclose(file);
+}
+
+void gfxReadFrameBuffer(FrameBuffer fb, const char *filename)
+{
+    FILE *file = fopen(filename, "rb");
+    if (!file)
+        systemShutDown();
+
+    fread(fb, 256 * 192, sizeof(u16), file);
+    fclose(file);
+}

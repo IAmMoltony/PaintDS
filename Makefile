@@ -193,7 +193,7 @@ clean:
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(SOUNDBANK)
 
 #---------------------------------------------------------------------------------
-EMULATOR := ~/melonDS
+EMULATOR := E:/melonds/melonds
 run:
 	@echo run ...
 	@$(EMULATOR) $(TARGET).nds
