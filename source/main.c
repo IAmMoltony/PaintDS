@@ -154,7 +154,7 @@ int main(int argc, char **argv)
         consoleDemoInit();
         printf("Oh no!\n\n");
         printf("Failed to initialize FAT.\n");
-        printf("Make sure your rom is properly patched\n");
+        printf("Make sure your ROM is properly patched\n");
         printf("and the SD card is inserted.");
 
         while (true)
