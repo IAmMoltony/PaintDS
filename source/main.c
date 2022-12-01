@@ -167,8 +167,6 @@ int main(int argc, char **argv)
         mkdir("paintds_data", 0700);
     chdir("paintds_data");
 
-    remove("undo.buf");
-
     mmInitDefault("nitro:/soundbank.bin");
 
     mmLoadEffect(SFX_PENCIL);
