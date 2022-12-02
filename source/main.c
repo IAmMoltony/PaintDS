@@ -8,6 +8,7 @@
 #include "soundbank.h"
 #include "colors.h"
 #include "ppm.h"
+#include "bitarray.h"
 #include "background.h"
 #define COLORS_PER_PAGE 7
 #define MAX_COLOR_PAGE 1
@@ -166,6 +167,9 @@ int main(int argc, char **argv)
     if (stat("paintds_data", &pds_data_st) == -1)
         mkdir("paintds_data", 0700);
     chdir("paintds_data");
+
+    BitArray test = bitArrayCreate(32);
+    bitArrayWrite(test, "test.bitarr");
 
     mmInitDefault("nitro:/soundbank.bin");
 

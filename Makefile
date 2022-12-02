@@ -107,6 +107,9 @@ CFLAGS	:=	-g -Wall -Wextra -Wno-free-nonheap-object -Wno-unknown-pragmas -Wno-ps
 			-ffast-math
 
 CFLAGS	+=	$(INCLUDE) -DARM9
+ifeq ($(DEBUG_BUILD),yes)
+CFLAGS += -DDEBUG_BUILD
+endif
 CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions -Wno-reorder
 
 ASFLAGS	:=	-g $(ARCH)
@@ -185,7 +188,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) BUILDDIR=`cd $(BUILD) && pwd` --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@$(MAKE) BUILDDIR=`cd $(BUILD) && pwd` --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile DEBUG_BUILD=$(DEBUG_BUILD)
 
 #---------------------------------------------------------------------------------
 clean:
@@ -193,7 +196,7 @@ clean:
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(SOUNDBANK)
 
 #---------------------------------------------------------------------------------
-EMULATOR := E:/melonds/melonds
+EMULATOR := ~/melonDS
 run:
 	@echo run ...
 	@$(EMULATOR) $(TARGET).nds
