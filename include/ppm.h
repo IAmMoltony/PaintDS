@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphics.h"
-#include "bitarray.h"
 #include <stdio.h>
 
 typedef struct
@@ -15,15 +14,9 @@ typedef struct
     PPMPixel *pixels;
 } PPMImage;
 
-typedef struct
-{
-    BitArray glyphs;
-} PPMFont;
-
 #define RGB_COMPONENT_COLOR 255
 
 PPMImage *ppmLoad(const char *filename);
-PPMFont *ppmFontLoad(const char *filename);
 void ppmUnload(PPMImage *img);
 void ppmDraw(FrameBuffer fb, PPMImage *img, int x, int y);
 void ppmDrawMirrorX(FrameBuffer fb, PPMImage *img, int x, int y);
