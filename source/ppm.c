@@ -140,3 +140,20 @@ void ppmDrawMirrorX(FrameBuffer fb, PPMImage *img, int x, int y)
     ppmDraw(fb, img, x, y);
     rotateImgHoriz(img);
 }
+
+void ppmDrawPart(FrameBuffer fb, PPMImage *img, int x, int y, int xOff, int yOff, int w, int h)
+{
+    for (int i = xOff; i < w; ++i)
+        for (int j = yOff; j < h; ++j)
+        {
+            PPMPixel pixel = img->pixels[i + j * img->w];
+            u8 r = pixel.r;
+            u8 g = pixel.g;
+            u8 b = pixel.b;
+            // magenta = transparent
+            if (r == 255 && g == 0 && b == 255)
+                continue;
+            u16 color = ARGB16(1, r, g, b);
+            fb[(i + x) + (j + y) * SCREEN_WIDTH] = color;
+        }
+}
