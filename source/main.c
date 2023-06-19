@@ -168,8 +168,7 @@ int main(int argc, char **argv)
         mkdir("paintds_data", 0700);
     chdir("paintds_data");
 
-    BitArray test = bitArrayCreate(32);
-    bitArrayWrite(test, "test.bitarr");
+    PPMFont *testFont = ppmFontLoad("nitro:/test_font.ppm");
 
     mmInitDefault("nitro:/soundbank.bin");
 
@@ -570,6 +569,9 @@ int main(int argc, char **argv)
                 break;
             }
         }
+
+        for (u16 i = 0; i < 72; ++i)
+            gfxPutPixel(fb, i % 8, floor((float)i / 9), bitArrayGet(&testFont->glyphs, i) ? BLACK : WHITE);
 
         // copy frame buffer into bottom screen
         for (int x = 0; x < 256; ++x)

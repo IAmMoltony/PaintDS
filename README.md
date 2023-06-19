@@ -8,7 +8,7 @@ Paint DS is a panting application for the Nintendo DS.
 - Pencil tool: for drawing
 - Eraser tool: for erasing things (and drawing with white)
 - Fill tool: for filling areas with a color
-- Shapes tool: fopr creating shapes (rectangles, triangles and lines)
+- Shapes tool: for creating shapes (rectangles, triangles and lines)
 
 ## Building
 

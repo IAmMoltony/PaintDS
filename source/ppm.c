@@ -93,6 +93,30 @@ PPMImage *ppmLoad(const char *filename)
     return img;
 }
 
+PPMFont *ppmFontLoad(const char *filename)
+{
+    PPMImage *fontImage = ppmLoad(filename);
+    PPMFont *font = (PPMFont *)malloc(sizeof(PPMFont));
+    font->glyphs = bitArrayCreate(93 * 72);
+
+    for (u8 i = 0; i < 93; ++i)
+    {
+        for (u8 j = 0; j < 8; ++j)
+        {
+            for (u8 k = 0; k < 9; ++k)
+            {
+                if (fontImage->pixels[j + i * 8 + k * (93 * 72)].r)
+                    bitArraySet(&font->glyphs, i * 72 + j + k * 9);
+                else
+                    bitArrayClear(&font->glyphs, i * 72 + j + k * 9);
+            }
+        }
+    }
+
+    ppmUnload(fontImage);
+    return font;
+}
+
 void ppmUnload(PPMImage *img)
 {
     free(img->pixels);
