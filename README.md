@@ -1,3 +1,4 @@
+# PaintDS is no longer maintained. [Please see here.](https://iammoltony.github.io/abandonware.html#ap9)
 
 # PaintDS
 
